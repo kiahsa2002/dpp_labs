@@ -1,0 +1,7 @@
+mpirun --bind-to none -np 14 ./stencil /home/malka730/public/PDP/input8000000.txt input8000000.txt 8
+diff --ignore-all-space output120.txt /home/malka730/public/PDP/output120_2_ref.txt
+
+
+Check the MPI buffon-laplace.c and make the change in strencil using the 
+
+
