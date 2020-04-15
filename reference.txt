@@ -4,4 +4,8 @@ diff --ignore-all-space output120.txt /home/malka730/public/PDP/output120_2_ref.
 
 Check the MPI buffon-laplace.c and make the change in strencil using the 
 
+https://computing.llnl.gov/tutorials/mpi_performance/
+
+https://mpitutorial.com/tutorials/mpi-scatter-gather-and-allgather/
+
 

@@ -1,5 +1,11 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include <mpi.h>
+
 #include "stencil.h"
 
+#define ROOT 0
 
 int main(int argc, char **argv) {
         // Set up
@@ -10,7 +16,10 @@ int main(int argc, char **argv) {
 
 
 	if (4 != argc) {
-		printf("Usage: stencil input_file output_file number_of_applications\n");
+		if (ROOT == rank) {
+
+			printf("Usage: stencil input_file output_file number_of_applications\n");
+		}
 		return 1;
 	}
 	char *input_name = argv[1];
@@ -21,8 +30,8 @@ int main(int argc, char **argv) {
 	double *input;
 	int num_values;
 	if (0 > (num_values = read_input(input_name, &input))) {
-		return 2;
-	}
+                return 2;
+        }
 
 	// Stencil values
 	double h = 2.0*PI/num_values;
@@ -39,7 +48,11 @@ int main(int argc, char **argv) {
 		perror("Couldn't allocate memory for output");
 		return 2;
 	}
+	// Scatter the input to all processes to compute 
+	MPI_Scatter(&input, 1, MPI_DOUBLE, output, 1, MPI_DOUBLE, ROOT, MPI_COMM_WORLD);
+	//MPI_Bcast(&input, 1, MPI_DOUBLE, ROOT, MPI_COMM_WORLD);
 	// Repeatedly apply stencil
+	if (ROOT != rank) {
 	for (int s=0; s<num_steps; s++) {
 		// Apply stencil
 		for (int i=0; i<EXTENT; i++) {
@@ -73,15 +86,20 @@ int main(int argc, char **argv) {
 			output = tmp;
 		}
 	}
+	}
+	// Gather the output from all processes 
+	MPI_Gather(&output, 1, MPI_DOUBLE, input, 1, MPI_DOUBLE, ROOT, MPI_COMM_WORLD);
 	free(input);
 	// Stop timer
 	double my_execution_time = MPI_Wtime() - start;
 
 	// Write result
 	printf("%f\n", my_execution_time);
+	if (ROOT == rank) {
 #ifdef PRODUCE_OUTPUT_FILE
 	if (0 != write_output(output_name, output, num_values)) {
 		return 2;
+	}
 	}
 #endif
 
