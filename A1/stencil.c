@@ -98,7 +98,7 @@ int main(int argc, char **argv) {
 	if (0 != write_output(output_name, output, num_values)) {
 		return 2;
 	}
-	}
+	} 
 #endif
 
 	// Clean up
